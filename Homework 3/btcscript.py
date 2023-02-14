@@ -1,4 +1,7 @@
 import sys
+from datetime import datetime
+# datetime.fromtimestamp(TIMESTAMP)
+
 error_lookup = {
     1 : "Invalid magic number",
     2 : "Invalid header version",
@@ -8,12 +11,13 @@ error_lookup = {
     6 : "The Merkle tree hash in the header is incorrect"
 }
 fileName = sys.argv[1]
-
+f = open(fileName, mode='rb')
 
 
 def readFile(numBytes):
-    with open(fileName, mode='rb') as file: # b is important -> binary
-        return file.read(numBytes)
+    # with open(fileName, mode='rb') as file: # b is important -> binary
+    #     return file.read(numBytes)
+    return f.read(numBytes)
 
 def compactSize():
     b = readFile(1) # read first byte
@@ -48,14 +52,18 @@ class Block:
         self.txn_count = None
         self.transactions = None
 
-    def getPreamble(self):
+    def getPreamble(self): # order matters
         self.preamble = Preamble()
         self.preamble.getMagicNumber()
         self.preamble.getSize()
-    def getHeader(self):
+    def getHeader(self): # order matters
         self.header = Header()
         self.header.getVersion()
         self.header.getPrevHash()
+        self.header.getMerkleRootHash()
+        self.header.getTime()
+        self.header.GetnBits()
+        self.header.getNonce()
     def getTransactions(self):
         self.transactions = Transaction()
         self.transactions.getTXInput_Count()
@@ -73,20 +81,22 @@ class Header: # header class
         self.version = int.from_bytes(bytes, 'little')
     def getPrevHash(self):
         bytes_array = bytearray(readFile(32))
-        bytes_array[::-1] # reverse the endianess of these bytes
-        self.prev_hash = b''.join([bytes_array])
+        bytes_array.reverse() # reverse the endianess of these bytes
+        self.prev_hash = str(bytes(bytes_array).hex())
     def getMerkleRootHash(self):
         bytes_array = bytearray(readFile(32))
-        self.merkle_root_hash = b''.join([bytes_array])
+        bytes_array.reverse()
+        self.merkle_root_hash = str(bytes(bytes_array).hex())
     def getTime(self):
         bytes = readFile(4)
-        self.time = int.from_bytes(bytes, 'little')
-    def nBits(self):
+        self.time = int.from_bytes(bytes, 'little', signed=False)
+    def GetnBits(self):
         bytes = readFile(4)
-        self.nBits = int.from_bytes(bytes, 'little')
+        print("here", bytes)
+        self.nBits = int.from_bytes(bytes, 'big', signed=False)
     def getNonce(self):
         bytes = readFile(4)
-        self.nonce = int.from_bytes(bytes, 'little')
+        self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 class TransactionInput:
     def __init__(self):
@@ -150,16 +160,22 @@ class Transaction:
 
 bl = Block()
 bl.getPreamble()
-
 bl.getHeader()
-bl.header.getPrevHash()
-
 bl.getTransactions()
-bl.transactions.getTXInput_Count()
-print("tx_in_count: ", bl.transactions.tx_in_count)
+
+print("magic_number", bl.preamble.magic_number)
+print("size: ", bl.preamble.size)
+print("header version ", bl.header.version)
+print("header prev hash", bl.header.prev_hash)
+print("merkle_root_hash: ", bl.header.merkle_root_hash)
+print("time: ", bl.header.time)
+print("nBits", bl.header.nBits)
+print("nonce", bl.header.nonce)
+
+# print("tx_in_count: ", bl.transactions.tx_in_count)
 # print("prev_hash", bl.header.prev_hash)
 
-
+f.close()
 
 
 
