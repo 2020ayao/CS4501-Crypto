@@ -51,36 +51,72 @@ class Preamble:
 
 
 class Block:
-    def __init__(self):
-        self.preamble = None
-        self.header = None
+    def __init__(self, height):
+        # self.preamble = None
+        # self.header = None
+        self.height = height
+        self.version = None
+        self.prev_hash = None
+        self.merkle_root_hash = None
+        self.time = None
+        self.nBits = None
+        self.nonce = None
+
         self.txn_count = None
-        self.transactions = None
+        self.transactions = []
 
     def getPreamble(self): # order matters
         self.preamble = Preamble()
         self.preamble.getMagicNumber()
         self.preamble.getSize()
     def getHeader(self): # order matters
-        self.header = Header()
-        self.header.getVersion()
-        self.header.getPrevHash()
-        self.header.getMerkleRootHash()
-        self.header.getTime()
-        self.header.GetnBits()
-        self.header.getNonce()
-    def getTransactions(self):
-        self.transactions = Transaction()
+        # self.header = Header()
+        self.getVersion()
+        self.getPrevHash()
+        self.getMerkleRootHash()
+        self.getTime()
+        self.GetnBits()
+        self.getNonce()
 
-        self.transactions.getVersion()
-        self.transactions.getTXInput_Count()
-        self.transactions.getTXInputs()
-        self.transactions.getTXOutput_Count()
-        self.transactions.getTXOutputs()
-        self.transactions.getLockTime()
+    def getTransaction(self):
+        tran = Transaction()
+
+        tran.getVersion()
+        tran.getTXInput_Count()
+        tran.getTXInputs()
+        tran.getTXOutput_Count()
+        tran.getTXOutputs()
+        tran.getLockTime()
+        return tran
 
     def getTransactionCount(self):
         self.txn_count = compactSize()
+
+    # HEADER METHODS
+    def getVersion(self):
+        bytes_array = bytearray(readFile(4))
+        bytes_array.reverse()
+        self.version = int.from_bytes(bytes(bytes_array))
+
+    def getPrevHash(self):
+        bytes_array = bytearray(readFile(32))
+        bytes_array.reverse() # reverse the endianess of these bytes
+        self.prev_hash = str(bytes(bytes_array).hex())
+    def getMerkleRootHash(self):
+        bytes_array = bytearray(readFile(32))
+        bytes_array.reverse()
+        self.merkle_root_hash = str(bytes(bytes_array).hex())
+    def getTime(self):
+        bytes = readFile(4)
+        self.time = int.from_bytes(bytes, 'little', signed=False)
+    def GetnBits(self):
+        bytes_array = bytearray(readFile(4))
+        bytes_array.reverse()
+        # self.nBits = int.from_bytes(bytes, 'big', signed=False)
+        self.nBits = bytes(bytes_array).hex()
+    def getNonce(self):
+        bytes = readFile(4)
+        self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 
     
@@ -121,21 +157,21 @@ class Header: # header class
 class TransactionOutput:
     def __init__(self):
         self.value = None
-        self.out_script_bytes = None
-        self.out_script = None
+        self.output_script_size = None
+        self.output_script_bytes = None
     def getValue(self):
         self.value = int.from_bytes(readFile(8), 'little')
     def getOutScriptBytes(self):
-        self.out_script_bytes = compactSize()
+        self.output_script_size = compactSize()
     def getOutScript(self):
-        self.out_script = readFile(self.out_script_bytes).hex()
+        self.output_script_bytes = readFile(self.output_script_size).hex()
 
 class TransactionInput:
     def __init__(self):
         self.utxo_hash = None
         self.index = None
-        self.in_script_bytes = None
-        self.signature_script = None
+        self.input_script_size = None
+        self.input_script_bytes = None
         self.sequence = None
     def getHash(self):
         bytes_array = bytearray(readFile(32))
@@ -144,39 +180,44 @@ class TransactionInput:
     def getIndex(self):
         self.index = int.from_bytes(readFile(4),'little')
     def getInScriptBytes(self):
-        self.in_script_bytes = compactSize()
-        # print("in_script_bytes: ", self.in_script_bytes)
+        self.input_script_size = compactSize()
+        # print("input_script_size: ", self.input_script_size)
     def getSignatureScript(self):
         # bytes_array = bytearray(readFile(32))
-        self.signature_script = readFile(self.in_script_bytes).hex()
-        # self.signature_script = int.from_bytes(readFile(self.in_script_bytes),'little') # is this in decimal or hex?
+        self.input_script_bytes = readFile(self.input_script_size).hex()
+        # self.input_script_bytes = int.from_bytes(readFile(self.input_script_size),'little') # is this in decimal or hex?
     def getSequence(self):
         self.sequence = int.from_bytes(readFile(4))
 
 class Blocks:
     def __init__(self):
         self.blocks = []
+        self.height = None
 
     def toJSON(self):
         # return json.dumps(self, default=lambda o: o.__dict__)
         return json.dumps(self, default=lambda o: o.__dict__, indent=4)
 
-    def getBlock(self):
-        bl = Block()
+    def getBlock(self, height):
+        bl = Block(height)
         bl.getPreamble()
         bl.getHeader()
         bl.getTransactionCount()
         for _ in range(bl.txn_count):
-            bl.getTransactions()
+            bl.transactions.append(bl.getTransaction())
         self.blocks.append(bl)
+
+    def finalizeHeight(self, h):
+        self.height = h
+
 
 class Transaction:
     def __init__(self):
         self.version = None
-        self.tx_in_count = None
-        self.tx_in = []
-        self.tx_out_count = None
-        self.tx_out = []
+        self.txn_in_count = None
+        self.txn_in = []
+        self.txn_out_count = None
+        self.txn_out = []
         self.lock_time = None
 
     def getVersion(self):
@@ -187,28 +228,28 @@ class Transaction:
         self.version = int.from_bytes(bytes(bytes_array))
 
     def getTXInput_Count(self):
-        self.tx_in_count = compactSize()
+        self.txn_in_count = compactSize()
 
     def getTXInputs(self):
-        for _ in range(self.tx_in_count):
+        for _ in range(self.txn_in_count):
             tr = TransactionInput()
             tr.getHash()
             tr.getIndex()
             tr.getInScriptBytes()
             tr.getSignatureScript()
             tr.getSequence()
-            self.tx_in.append(tr)
+            self.txn_in.append(tr)
     
     def getTXOutput_Count(self):
-        self.tx_out_count = compactSize()
+        self.txn_out_count = compactSize()
         
     def getTXOutputs(self):
-        for _ in range(self.tx_out_count):
+        for _ in range(self.txn_out_count):
             tr = TransactionOutput()
             tr.getValue()
             tr.getOutScriptBytes()
             tr.getOutScript()
-            self.tx_out.append(tr)        
+            self.txn_out.append(tr)        
     def getLockTime(self):
         self.lock_time = int.from_bytes(readFile(4), 'little')
 
@@ -228,52 +269,64 @@ f = open(fileName, mode='rb')
 
 
 
-with open('output.txt', 'w') as file:
-    sys.stdout = file # Change the standard output to the file we created.
-
-    # print(json.dumps(d,indent=4))
 
 
-    bigBlock = Blocks()
-    bigBlock.getBlock()
-    print(bigBlock.toJSON())
-    # json_obj = json.dumps(bigBlock, indent=4)
-    # print(json_obj)
+# with open('output.txt', 'w') as file:
+#     sys.stdout = file # Change the standard output to the file we created.
 
-    # print(d.encode)
-
-    # print("magic_number", bl.preamble.magic_number) #preamble
-    # print("size: ", bl.preamble.size)
-
-    # print("header version ", bl.header.version) # header
-    # print("header prev hash", bl.header.prev_hash)
-    # print("merkle_root_hash: ", bl.header.merkle_root_hash)
-    # print("time: ", bl.header.time)
-    # print("nBits", bl.header.nBits)
-    # print("nonce", bl.header.nonce) 
-
-    # print("transaction version: ", bl.transactions.version) # transaction
-    # print("tx_in_count: ", bl.transactions.tx_in_count)
-
-    # # print("tx_inputs: ", bl.transactions.tx_in)
-    # print("tx_inputs: ")
-    # for i in range(bl.transactions.tx_in_count):
-    #     print("utxo_hash: ", bl.transactions.tx_in[i].utxo_hash)
-    #     print("index: ", bl.transactions.tx_in[i].index)
-    #     print("in_script_bytes: ", bl.transactions.tx_in[i].in_script_bytes)
-    #     print("signature script: ", bl.transactions.tx_in[i].signature_script)
-    #     print("sequence: ", bl.transactions.tx_in[i].sequence)
-    # print("tx_output_count: ")
-    # for i in range(bl.transactions.tx_out_count):
-    #     print("satoshis: ", bl.transactions.tx_out[i].value)
-    #     print("out_script_bytes: ", bl.transactions.tx_out[i].out_script_bytes)
-    #     print("out_script: ", bl.transactions.tx_out[i].out_script)
-    # print("locktime: ", bl.transactions.lock_time)
+#     # print(json.dumps(d,indent=4))
 
 
+    
+#     bigBlock.getBlock(height)
+    
+#     # json_obj = json.dumps(bigBlock, indent=4)
+#     # print(json_obj)
+
+#     # print(d.encode)
+
+#     # print("magic_number", bl.preamble.magic_number) #preamble
+#     # print("size: ", bl.preamble.size)
+
+#     # print("header version ", bl.version) # header
+#     # print("header prev hash", bl.prev_hash)
+#     # print("merkle_root_hash: ", bl.merkle_root_hash)
+#     # print("time: ", bl.time)
+#     # print("nBits", bl.nBits)
+#     # print("nonce", bl.nonce) 
+
+#     # print("transaction version: ", bl.transactions.version) # transaction
+#     # print("txn_in_count: ", bl.transactions.txn_in_count)
+
+#     # # print("txn_inputs: ", bl.transactions.txn_in)
+#     # print("txn_inputs: ")
+#     # for i in range(bl.transactions.txn_in_count):
+#     #     print("utxo_hash: ", bl.transactions.txn_in[i].utxo_hash)
+#     #     print("index: ", bl.transactions.txn_in[i].index)
+#     #     print("sze: ", bl.transactions.txn_in[i].input_script_size)
+#     #     print("signature script: ", bl.transactions.txn_in[i].input_script_bytes)
+#     #     print("sequence: ", bl.transactions.txn_in[i].sequence)
+#     # print("txn_output_count: ")
+#     # for i in range(bl.transactions.txn_out_count):
+#     #     print("satoshis: ", bl.transactions.txn_out[i].value)
+#     #     print("output_script_size: ", bl.transactions.txn_out[i].output_script_size)
+#     #     print("output_script_bytes: ", bl.transactions.txn_out[i].output_script_bytes)
+#     # print("locktime: ", bl.transactions.lock_time)
 
 
+file = open("output.txt", mode='w')
 
+bigBlock = Blocks()
+height = 0
+# while f:
+bigBlock.getBlock(height)
+height += 1
+
+bigBlock.finalizeHeight(height)
+file.write(bigBlock.toJSON())
+
+
+file.close()
 f.close()
 
 
