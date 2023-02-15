@@ -17,11 +17,20 @@ error_lookup = {
 }
 
 
+fileName = sys.argv[1]
+f = open(fileName, mode='rb')
+bytes_master = f.read()
+# print(type(bytes_master))
+f.close()
+
 
 def readFile(numBytes):
+    global bytes_master
     # with open(fileName, mode='rb') as file: # b is important -> binary
     #     return file.read(numBytes)
-    return f.read(numBytes)
+    res = bytes_master[:numBytes]
+    bytes_master = bytes_master[numBytes:]
+    return res
 
 def compactSize():
     b = readFile(1) # read first byte
@@ -56,25 +65,28 @@ class Block:
         # self.header = None
         self.height = height
         self.version = None
-        self.prev_hash = None
-        self.merkle_root_hash = None
-        self.time = None
-        self.nBits = None
+        self.previous_hash = None
+        self.merkle_hash = None
+        self.timestamp = None
+        self.timestamp_readable = None
+        self.nbits = None
         self.nonce = None
 
         self.txn_count = None
         self.transactions = []
 
-    def getPreamble(self): # order matters
-        self.preamble = Preamble()
-        self.preamble.getMagicNumber()
-        self.preamble.getSize()
+    # def getPreamble(self): # order matters
+    #     self.preamble = Preamble()
+    #     self.preamble.getMagicNumber()
+    #     self.preamble.getSize()
+        
     def getHeader(self): # order matters
         # self.header = Header()
         self.getVersion()
         self.getPrevHash()
         self.getMerkleRootHash()
         self.getTime()
+        self.getTimereadable()
         self.GetnBits()
         self.getNonce()
 
@@ -101,33 +113,38 @@ class Block:
     def getPrevHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse() # reverse the endianess of these bytes
-        self.prev_hash = str(bytes(bytes_array).hex())
+        self.previous_hash = str(bytes(bytes_array).hex())
     def getMerkleRootHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse()
-        self.merkle_root_hash = str(bytes(bytes_array).hex())
+        self.merkle_hash = str(bytes(bytes_array).hex())
     def getTime(self):
         bytes = readFile(4)
-        self.time = int.from_bytes(bytes, 'little', signed=False)
+        self.timestamp = int.from_bytes(bytes, 'little', signed=False)
+        # print(self.timestamp)
+    def getTimereadable(self):
+        self.timestamp_readable = datetime.utcfromtimestamp(self.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        
+        # print(timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+        # self.timestamp_readable = self.timestamp_readable.strftime('%Y-%m-%d %H:%M:%S')
+
     def GetnBits(self):
         bytes_array = bytearray(readFile(4))
         bytes_array.reverse()
-        # self.nBits = int.from_bytes(bytes, 'big', signed=False)
-        self.nBits = bytes(bytes_array).hex()
+        # self.nbits = int.from_bytes(bytes, 'big', signed=False)
+        self.nbits = bytes(bytes_array).hex()
     def getNonce(self):
         bytes = readFile(4)
         self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 
-    
-
 class Header: # header class 
     def __init__(self):
         self.version = None
-        self.prev_hash = None
-        self.merkle_root_hash = None
-        self.time = None
-        self.nBits = None
+        self.previous_hash = None
+        self.merkle_hash = None
+        self.timestamp = None
+        self.nbits = None
         self.nonce = None
     def getVersion(self):
         bytes_array = bytearray(readFile(4))
@@ -137,30 +154,30 @@ class Header: # header class
     def getPrevHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse() # reverse the endianess of these bytes
-        self.prev_hash = str(bytes(bytes_array).hex())
+        self.previous_hash = str(bytes(bytes_array).hex())
     def getMerkleRootHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse()
-        self.merkle_root_hash = str(bytes(bytes_array).hex())
+        self.merkle_hash = str(bytes(bytes_array).hex())
     def getTime(self):
         bytes = readFile(4)
-        self.time = int.from_bytes(bytes, 'little', signed=False)
+        self.timestamp = int.from_bytes(bytes, 'little', signed=False)
     def GetnBits(self):
         bytes_array = bytearray(readFile(4))
         bytes_array.reverse()
-        # self.nBits = int.from_bytes(bytes, 'big', signed=False)
-        self.nBits = bytes(bytes_array).hex()
+        # self.nbits = int.from_bytes(bytes, 'big', signed=False)
+        self.nbits = bytes(bytes_array).hex()
     def getNonce(self):
         bytes = readFile(4)
         self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 class TransactionOutput:
     def __init__(self):
-        self.value = None
+        self.satoshis = None
         self.output_script_size = None
         self.output_script_bytes = None
     def getValue(self):
-        self.value = int.from_bytes(readFile(8), 'little')
+        self.satoshis = int.from_bytes(readFile(8), 'little')
     def getOutScriptBytes(self):
         self.output_script_size = compactSize()
     def getOutScript(self):
@@ -200,7 +217,7 @@ class Blocks:
 
     def getBlock(self, height):
         bl = Block(height)
-        bl.getPreamble()
+        # bl.getPreamble()
         bl.getHeader()
         bl.getTransactionCount()
         for _ in range(bl.txn_count):
@@ -215,9 +232,9 @@ class Transaction:
     def __init__(self):
         self.version = None
         self.txn_in_count = None
-        self.txn_in = []
+        self.txn_inputs = []
         self.txn_out_count = None
-        self.txn_out = []
+        self.txn_outputs = []
         self.lock_time = None
 
     def getVersion(self):
@@ -238,7 +255,7 @@ class Transaction:
             tr.getInScriptBytes()
             tr.getSignatureScript()
             tr.getSequence()
-            self.txn_in.append(tr)
+            self.txn_inputs.append(tr)
     
     def getTXOutput_Count(self):
         self.txn_out_count = compactSize()
@@ -249,12 +266,10 @@ class Transaction:
             tr.getValue()
             tr.getOutScriptBytes()
             tr.getOutScript()
-            self.txn_out.append(tr)        
+            self.txn_outputs.append(tr)        
     def getLockTime(self):
         self.lock_time = int.from_bytes(readFile(4), 'little')
 
-fileName = sys.argv[1]
-f = open(fileName, mode='rb')
 
 # while f.read() != "":
 
@@ -308,26 +323,29 @@ f = open(fileName, mode='rb')
 #     #     print("sequence: ", bl.transactions.txn_in[i].sequence)
 #     # print("txn_output_count: ")
 #     # for i in range(bl.transactions.txn_out_count):
-#     #     print("satoshis: ", bl.transactions.txn_out[i].value)
+#     #     print("satoshis: ", bl.transactions.txn_out[i].satoshis)
 #     #     print("output_script_size: ", bl.transactions.txn_out[i].output_script_size)
 #     #     print("output_script_bytes: ", bl.transactions.txn_out[i].output_script_bytes)
 #     # print("locktime: ", bl.transactions.lock_time)
 
-
-file = open("output.txt", mode='w')
-
+# fileName = "blk00000-f10.blk"
+file = open(fileName + ".json", mode='w')
 bigBlock = Blocks()
 height = 0
-# while f:
-bigBlock.getBlock(height)
-height += 1
+while len(bytes_master.hex()) > 0:
+    
+# while f.readline() != "":
+    p = Preamble()
+    magicNumber = p.getMagicNumber()
+    size = p.getSize()
+    bigBlock.getBlock(height)
+    height += 1
 
 bigBlock.finalizeHeight(height)
 file.write(bigBlock.toJSON())
 
 
 file.close()
-f.close()
 
 
 
