@@ -1,6 +1,11 @@
 import sys
 from datetime import datetime
+import json
+from collections import defaultdict
 # datetime.fromtimestamp(TIMESTAMP)
+
+jd = {}
+jd["blocks"] = []
 
 error_lookup = {
     1 : "Invalid magic number",
@@ -191,13 +196,15 @@ class Transaction:
 fileName = sys.argv[1]
 f = open(fileName, mode='rb')
 
-while f.peek() != "":
-    bl = Block()
-    bl.getPreamble()
-    bl.getHeader()
-    bl.getTransactionCount()
-    for _ in range(bl.txn_count):
-        bl.getTransactions()
+# while f.read() != "":
+bl = Block()
+bl.getPreamble()
+bl.getHeader()
+bl.getTransactionCount()
+for _ in range(bl.txn_count):
+    bl.getTransactions()
+
+
 
 
 
@@ -205,6 +212,8 @@ while f.peek() != "":
 with open('output.txt', 'w') as file:
     sys.stdout = file # Change the standard output to the file we created.
 
+
+    json_d = json.loads(jd)
 
     print("magic_number", bl.preamble.magic_number) #preamble
     print("size: ", bl.preamble.size)
@@ -233,6 +242,11 @@ with open('output.txt', 'w') as file:
         print("out_script_bytes: ", bl.transactions.tx_out[i].out_script_bytes)
         print("out_script: ", bl.transactions.tx_out[i].out_script)
     print("locktime: ", bl.transactions.lock_time)
+
+
+
+
+
 f.close()
 
 
