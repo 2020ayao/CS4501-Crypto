@@ -4,8 +4,9 @@ import json
 from collections import defaultdict
 # datetime.fromtimestamp(TIMESTAMP)
 
-jd = {}
-jd["blocks"] = []
+d = {}
+d["blocks"] = []
+height = 0
 
 error_lookup = {
     1 : "Invalid magic number",
@@ -51,11 +52,11 @@ class Preamble:
 
 
 class Block:
-    def __init__(self):
-        self.preamble = None
+    def __init__(self, height):
+        self.height = height
         self.header = None
         self.txn_count = None
-        self.transactions = None
+        self.transactions = []
 
     def getPreamble(self): # order matters
         self.preamble = Preamble()
@@ -81,6 +82,10 @@ class Block:
 
     def getTransactionCount(self):
         self.txn_count = compactSize()
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 class Header: # header class 
     def __init__(self):
@@ -197,12 +202,6 @@ fileName = sys.argv[1]
 f = open(fileName, mode='rb')
 
 # while f.read() != "":
-bl = Block()
-bl.getPreamble()
-bl.getHeader()
-bl.getTransactionCount()
-for _ in range(bl.txn_count):
-    bl.getTransactions()
 
 
 
@@ -211,41 +210,54 @@ for _ in range(bl.txn_count):
 
 with open('output.txt', 'w') as file:
     sys.stdout = file # Change the standard output to the file we created.
+    # while f.readline() != "":
+    bl = Block(height)
+    bl.getPreamble()
+    bl.getHeader()
+    bl.getTransactionCount()
+    for _ in range(bl.txn_count):
+        bl.getTransactions()
+    
+    
+
+    print(bl.toJSON())
+    height += 1
+
+        # print("magic_number", bl.preamble.magic_number) #preamble
+        # print("size: ", bl.preamble.size)
+
+        
 
 
-    json_d = json.loads(jd)
+        # print("header version ", bl.header.version) # header
+        # print("header prev hash", bl.header.prev_hash)
+        # print("merkle_root_hash: ", bl.header.merkle_root_hash)
+        # print("time: ", bl.header.time)
+        # print("nBits", bl.header.nBits)
+        # print("nonce", bl.header.nonce) 
 
-    print("magic_number", bl.preamble.magic_number) #preamble
-    print("size: ", bl.preamble.size)
+        # print("transaction version: ", bl.transactions.version) # transaction
+        # print("tx_in_count: ", bl.transactions.tx_in_count)
 
-    print("header version ", bl.header.version) # header
-    print("header prev hash", bl.header.prev_hash)
-    print("merkle_root_hash: ", bl.header.merkle_root_hash)
-    print("time: ", bl.header.time)
-    print("nBits", bl.header.nBits)
-    print("nonce", bl.header.nonce) 
-
-    print("transaction version: ", bl.transactions.version) # transaction
-    print("tx_in_count: ", bl.transactions.tx_in_count)
-
-    # print("tx_inputs: ", bl.transactions.tx_in)
-    print("tx_inputs: ")
-    for i in range(bl.transactions.tx_in_count):
-        print("utxo_hash: ", bl.transactions.tx_in[i].utxo_hash)
-        print("index: ", bl.transactions.tx_in[i].index)
-        print("in_script_bytes: ", bl.transactions.tx_in[i].in_script_bytes)
-        print("signature script: ", bl.transactions.tx_in[i].signature_script)
-        print("sequence: ", bl.transactions.tx_in[i].sequence)
-    print("tx_output_count: ")
-    for i in range(bl.transactions.tx_out_count):
-        print("satoshis: ", bl.transactions.tx_out[i].value)
-        print("out_script_bytes: ", bl.transactions.tx_out[i].out_script_bytes)
-        print("out_script: ", bl.transactions.tx_out[i].out_script)
-    print("locktime: ", bl.transactions.lock_time)
+        # # print("tx_inputs: ", bl.transactions.tx_in)
+        # print("tx_inputs: ")
+        # for i in range(bl.transactions.tx_in_count):
+        #     print("utxo_hash: ", bl.transactions.tx_in[i].utxo_hash)
+        #     print("index: ", bl.transactions.tx_in[i].index)
+        #     print("in_script_bytes: ", bl.transactions.tx_in[i].in_script_bytes)
+        #     print("signature script: ", bl.transactions.tx_in[i].signature_script)
+        #     print("sequence: ", bl.transactions.tx_in[i].sequence)
+        # print("tx_output_count: ")
+        # for i in range(bl.transactions.tx_out_count):
+        #     print("satoshis: ", bl.transactions.tx_out[i].value)
+        #     print("out_script_bytes: ", bl.transactions.tx_out[i].out_script_bytes)
+        #     print("out_script: ", bl.transactions.tx_out[i].out_script)
+        # print("locktime: ", bl.transactions.lock_time)
 
 
 
-
+# json_object = json.dumps(d, indent = 4) 
+# print(json_object)
 
 f.close()
 
