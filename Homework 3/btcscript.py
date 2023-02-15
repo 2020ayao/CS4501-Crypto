@@ -341,6 +341,9 @@ while len(bytes_master.hex()) > 0:
     bigBlock.getBlock(height)
     height += 1
 
+    if height%100 == 0:
+        print(height)
+
 bigBlock.finalizeHeight(height)
 file.write(bigBlock.toJSON())
 
