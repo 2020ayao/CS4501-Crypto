@@ -1,11 +1,15 @@
 import sys
-from datetime import datetime
+from datetime import datetime, date
+
+from datetime import timedelta, time
 import json
 from collections import defaultdict
 # datetime.fromtimestamp(TIMESTAMP)
 
 d = {}
 d["blocks"] = []
+
+magicNumber_FINAL = 3652501241
 
 error_lookup = {
     1 : "Invalid magic number",
@@ -138,38 +142,38 @@ class Block:
         self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 
-class Header: # header class 
-    def __init__(self):
-        self.version = None
-        self.previous_hash = None
-        self.merkle_hash = None
-        self.timestamp = None
-        self.nbits = None
-        self.nonce = None
-    def getVersion(self):
-        bytes_array = bytearray(readFile(4))
-        bytes_array.reverse()
-        self.version = int.from_bytes(bytes(bytes_array))
+# class Header: # header class 
+#     def __init__(self):
+#         self.version = None
+#         self.previous_hash = None
+#         self.merkle_hash = None
+#         self.timestamp = None
+#         self.nbits = None
+#         self.nonce = None
+#     def getVersion(self):
+#         bytes_array = bytearray(readFile(4))
+#         bytes_array.reverse()
+#         self.version = int.from_bytes(bytes(bytes_array))
 
-    def getPrevHash(self):
-        bytes_array = bytearray(readFile(32))
-        bytes_array.reverse() # reverse the endianess of these bytes
-        self.previous_hash = str(bytes(bytes_array).hex())
-    def getMerkleRootHash(self):
-        bytes_array = bytearray(readFile(32))
-        bytes_array.reverse()
-        self.merkle_hash = str(bytes(bytes_array).hex())
-    def getTime(self):
-        bytes = readFile(4)
-        self.timestamp = int.from_bytes(bytes, 'little', signed=False)
-    def GetnBits(self):
-        bytes_array = bytearray(readFile(4))
-        bytes_array.reverse()
-        # self.nbits = int.from_bytes(bytes, 'big', signed=False)
-        self.nbits = bytes(bytes_array).hex()
-    def getNonce(self):
-        bytes = readFile(4)
-        self.nonce = int.from_bytes(bytes, 'little', signed=False)
+#     def getPrevHash(self):
+#         bytes_array = bytearray(readFile(32))
+#         bytes_array.reverse() # reverse the endianess of these bytes
+#         self.previous_hash = str(bytes(bytes_array).hex())
+#     def getMerkleRootHash(self):
+#         bytes_array = bytearray(readFile(32))
+#         bytes_array.reverse()
+#         self.merkle_hash = str(bytes(bytes_array).hex())
+#     def getTime(self):
+#         bytes = readFile(4)
+#         self.timestamp = int.from_bytes(bytes, 'little', signed=False)
+#     def GetnBits(self):
+#         bytes_array = bytearray(readFile(4))
+#         bytes_array.reverse()
+#         # self.nbits = int.from_bytes(bytes, 'big', signed=False)
+#         self.nbits = bytes(bytes_array).hex()
+#     def getNonce(self):
+#         bytes = readFile(4)
+#         self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 class TransactionOutput:
     def __init__(self):
@@ -336,19 +340,46 @@ while len(bytes_master.hex()) > 0:
     
 # while f.readline() != "":
     p = Preamble()
-    magicNumber = p.getMagicNumber()
-    size = p.getSize()
+    p.getMagicNumber()
+    p.getSize()
+    
+    
+    # if magicNumber != 
+    
     bigBlock.getBlock(height)
+    block = bigBlock.blocks[height]
+    
+    prev_block= bigBlock.blocks[height-1]
+    if p.magic_number != magicNumber_FINAL: #error 1
+        print("error 1 block" + str(height)) 
+        exit()
+    if str(block.version) != "1": #error 2
+        print("error 2 block" + str(height))
+        exit()
+    if height > 0 and prev_block.previous_hash == "": # error 3
+        pass
+    
+    d1 = datetime.strptime(block.timestamp_readable, "%Y-%m-%d %H:%M:%S%f")
+    d2 = datetime.strptime(prev_block.timestamp_readable, "%Y-%m-%d %H:%M:%S%f")
+    print((d1-d2))
+    # if height > 0 and d2-d1 > 2:
+    #     print("error 3 block" + str(height))
+
+    for i in range(block.txn_count):
+        if block.transactions[i].version != 1:
+            print("error 5 block " + str(height))
+            exit()
+
     height += 1
 
-    if height%100 == 0:
-        print(height)
+    # if height%100 == 0:
+    #     print(height)
 
 bigBlock.finalizeHeight(height)
 file.write(bigBlock.toJSON())
-
-
 file.close()
+
+print("no errors " + str(height) + " blocks")
 
 
 
