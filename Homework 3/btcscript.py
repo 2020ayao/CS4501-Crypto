@@ -1,49 +1,59 @@
 import sys
 from datetime import datetime
 import json
-from collections import defaultdict
-# datetime.fromtimestamp(TIMESTAMP)
+from hashlib import sha256
+from datetime import datetime
+import math 
 
-d = {}
-d["blocks"] = []
+merkleTree = [None]
+num_txn = 0
+magicNumber_FINAL = 3652501241
+transactions_merkle = []
+transaction_bytes = []
+previous_header_hash = []
 
-error_lookup = {
-    1 : "Invalid magic number",
-    2 : "Invalid header version",
-    3 : "Invalid previous header hash",
-    4 : "Invalid timestamp",
-    5 : "Invalid transaction version",
-    6 : "The Merkle tree hash in the header is incorrect"
-}
-
+txn = []
 
 fileName = sys.argv[1]
 f = open(fileName, mode='rb')
 bytes_master = f.read()
-# print(type(bytes_master))
 f.close()
+
+
 
 
 def readFile(numBytes):
     global bytes_master
-    # with open(fileName, mode='rb') as file: # b is important -> binary
-    #     return file.read(numBytes)
     res = bytes_master[:numBytes]
     bytes_master = bytes_master[numBytes:]
+    global txn
+    txn += res
     return res
 
-def compactSize():
+def compactSize(flag):
+    global transaction_bytes
     b = readFile(1) # read first byte
-    dec = int.from_bytes(b)
+    dec = int.from_bytes(b, 'little')
     # print("DEBUG dec: ", dec,b)
     if dec >= 0 and dec < 253:
+        if flag:
+            transaction_bytes += bytearray(b)
         return dec
     elif dec == 253:
-        return int.from_bytes(readFile(2), 'little')
+        b = readFile(2)
+        if flag:
+            transaction_bytes += bytearray(b)
+        return int.from_bytes(b, 'little')
     elif dec == 254:
-        return int.from_bytes(readFile(4), 'little')
+        b = readFile(4)
+        if flag:
+            transaction_bytes += bytearray(b)
+        return int.from_bytes(b, 'little')
     else:
-        return int.from_bytes(readFile(8), 'little')
+        b = readFile(8)
+        if flag:
+            transaction_bytes += bytearray(b)
+        return int.from_bytes(b, 'little')
 
 
 
@@ -58,11 +68,12 @@ class Preamble:
         bytes = readFile(4)
         self.size = int.from_bytes(bytes, 'little')
 
+        
+        
+
 
 class Block:
     def __init__(self, height):
-        # self.preamble = None
-        # self.header = None
         self.height = height
         self.version = None
         self.previous_hash = None
@@ -74,11 +85,6 @@ class Block:
 
         self.txn_count = None
         self.transactions = []
-
-    # def getPreamble(self): # order matters
-    #     self.preamble = Preamble()
-    #     self.preamble.getMagicNumber()
-    #     self.preamble.getSize()
         
     def getHeader(self): # order matters
         # self.header = Header()
@@ -102,18 +108,19 @@ class Block:
         return tran
 
     def getTransactionCount(self):
-        self.txn_count = compactSize()
+        self.txn_count = compactSize(False)
 
     # HEADER METHODS
     def getVersion(self):
         bytes_array = bytearray(readFile(4))
         bytes_array.reverse()
-        self.version = int.from_bytes(bytes(bytes_array))
+        self.version = int.from_bytes(bytes(bytes_array), byteorder='big')
 
     def getPrevHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse() # reverse the endianess of these bytes
         self.previous_hash = str(bytes(bytes_array).hex())
+
     def getMerkleRootHash(self):
         bytes_array = bytearray(readFile(32))
         bytes_array.reverse()
@@ -121,55 +128,17 @@ class Block:
     def getTime(self):
         bytes = readFile(4)
         self.timestamp = int.from_bytes(bytes, 'little', signed=False)
-        # print(self.timestamp)
     def getTimereadable(self):
         self.timestamp_readable = datetime.utcfromtimestamp(self.timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        
-        # print(timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-        # self.timestamp_readable = self.timestamp_readable.strftime('%Y-%m-%d %H:%M:%S')
 
     def GetnBits(self):
         bytes_array = bytearray(readFile(4))
         bytes_array.reverse()
-        # self.nbits = int.from_bytes(bytes, 'big', signed=False)
         self.nbits = bytes(bytes_array).hex()
     def getNonce(self):
         bytes = readFile(4)
         self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
-
-class Header: # header class 
-    def __init__(self):
-        self.version = None
-        self.previous_hash = None
-        self.merkle_hash = None
-        self.timestamp = None
-        self.nbits = None
-        self.nonce = None
-    def getVersion(self):
-        bytes_array = bytearray(readFile(4))
-        bytes_array.reverse()
-        self.version = int.from_bytes(bytes(bytes_array))
-
-    def getPrevHash(self):
-        bytes_array = bytearray(readFile(32))
-        bytes_array.reverse() # reverse the endianess of these bytes
-        self.previous_hash = str(bytes(bytes_array).hex())
-    def getMerkleRootHash(self):
-        bytes_array = bytearray(readFile(32))
-        bytes_array.reverse()
-        self.merkle_hash = str(bytes(bytes_array).hex())
-    def getTime(self):
-        bytes = readFile(4)
-        self.timestamp = int.from_bytes(bytes, 'little', signed=False)
-    def GetnBits(self):
-        bytes_array = bytearray(readFile(4))
-        bytes_array.reverse()
-        # self.nbits = int.from_bytes(bytes, 'big', signed=False)
-        self.nbits = bytes(bytes_array).hex()
-    def getNonce(self):
-        bytes = readFile(4)
-        self.nonce = int.from_bytes(bytes, 'little', signed=False)
 
 class TransactionOutput:
     def __init__(self):
@@ -177,11 +146,25 @@ class TransactionOutput:
         self.output_script_size = None
         self.output_script_bytes = None
     def getValue(self):
-        self.satoshis = int.from_bytes(readFile(8), 'little')
+        b = readFile(8)
+        self.satoshis = int.from_bytes(b, 'little')
+
+        global transaction_bytes
+        transaction_bytes += bytearray(bytes(b))
     def getOutScriptBytes(self):
-        self.output_script_size = compactSize()
+        self.output_script_size = compactSize(True)
+
+        global transaction_bytes
+
     def getOutScript(self):
-        self.output_script_bytes = readFile(self.output_script_size).hex()
+        b = readFile(self.output_script_size)
+        self.output_script_bytes = b.hex()
+
+        global transaction_bytes
+        transaction_bytes += bytearray(b)
+
+
+        
 
 class TransactionInput:
     def __init__(self):
@@ -192,19 +175,40 @@ class TransactionInput:
         self.sequence = None
     def getHash(self):
         bytes_array = bytearray(readFile(32))
+
+        global transaction_bytes
+        transaction_bytes += bytes_array
+
         bytes_array.reverse()
         self.utxo_hash = str(bytes(bytes_array).hex())
+
     def getIndex(self):
-        self.index = int.from_bytes(readFile(4),'little')
+        b = readFile(4)
+        self.index = int.from_bytes(b,'little')
+
+        global transaction_bytes
+        transaction_bytes += bytearray(b)
+
     def getInScriptBytes(self):
-        self.input_script_size = compactSize()
-        # print("input_script_size: ", self.input_script_size)
+        self.input_script_size = compactSize(True)
+
+
     def getSignatureScript(self):
-        # bytes_array = bytearray(readFile(32))
-        self.input_script_bytes = readFile(self.input_script_size).hex()
-        # self.input_script_bytes = int.from_bytes(readFile(self.input_script_size),'little') # is this in decimal or hex?
+        b = readFile(self.input_script_size)
+        self.input_script_bytes = b.hex()
+
+        global transaction_bytes
+        transaction_bytes += bytearray(bytes(b))
+
+
     def getSequence(self):
-        self.sequence = int.from_bytes(readFile(4))
+        b = readFile(4)
+        self.sequence = int.from_bytes(b, 'little')
+
+        global transaction_bytes
+        transaction_bytes += bytearray(bytes(b))
+
+
 
 class Blocks:
     def __init__(self):
@@ -212,16 +216,15 @@ class Blocks:
         self.height = None
 
     def toJSON(self):
-        # return json.dumps(self, default=lambda o: o.__dict__)
         return json.dumps(self, default=lambda o: o.__dict__, indent=4)
 
     def getBlock(self, height):
         bl = Block(height)
-        # bl.getPreamble()
         bl.getHeader()
         bl.getTransactionCount()
         for _ in range(bl.txn_count):
             bl.transactions.append(bl.getTransaction())
+            
         self.blocks.append(bl)
 
     def finalizeHeight(self, h):
@@ -238,14 +241,14 @@ class Transaction:
         self.lock_time = None
 
     def getVersion(self):
-        # self.version = int.from_bytes(readFile(4), 'little')
         bytes_array = bytearray(readFile(4))
+        global transaction_bytes
+        transaction_bytes += bytes_array
         bytes_array.reverse()
-        # self.version = int.from_bytes(bytes, 'little', signed=True)
-        self.version = int.from_bytes(bytes(bytes_array))
+        self.version = int.from_bytes(bytes(bytes_array), 'big')
 
     def getTXInput_Count(self):
-        self.txn_in_count = compactSize()
+        self.txn_in_count = compactSize(True)
 
     def getTXInputs(self):
         for _ in range(self.txn_in_count):
@@ -258,8 +261,8 @@ class Transaction:
             self.txn_inputs.append(tr)
     
     def getTXOutput_Count(self):
-        self.txn_out_count = compactSize()
-        
+        self.txn_out_count = compactSize(True)
+
     def getTXOutputs(self):
         for _ in range(self.txn_out_count):
             tr = TransactionOutput()
@@ -268,92 +271,131 @@ class Transaction:
             tr.getOutScript()
             self.txn_outputs.append(tr)        
     def getLockTime(self):
-        self.lock_time = int.from_bytes(readFile(4), 'little')
+        b = readFile(4)
+        self.lock_time = int.from_bytes(b, 'little')
 
+        global transaction_bytes
+        transaction_bytes += bytearray(b)
 
-# while f.read() != "":
+        transactions_merkle.append(bytes(transaction_bytes).hex())
+        transaction_bytes.clear()
 
+# -------- MERKLE TREE ---------- #
+def computeLength(num_txn):
+    return pow(2, math.ceil(math.log(num_txn)/math.log(2)));
 
-
-# d["blocks"].append(bl.toJSON())
-# print(json.dumps(d))
-# json_d = json.dumps(d, indent = 4)
-
-
-
-
-
-
-
-
-# with open('output.txt', 'w') as file:
-#     sys.stdout = file # Change the standard output to the file we created.
-
-#     # print(json.dumps(d,indent=4))
-
-
+def addHashes(nums): # hash later
+    global num_txn, merkleTree
     
-#     bigBlock.getBlock(height)
+    num_txn = len(nums) # if odd we duplicate last, if even we add normally
+    length = computeLength(num_txn) # this will determine length of our necessary merkle tree array
+    if length > len(merkleTree): # extend the tree
+        extraNone = [None] * (length - len(merkleTree))
+        merkleTree += extraNone
+        for txn in nums:
+            merkleTree.append(str(txn))
+        if num_txn % 2 != 0:
+            merkleTree.append(str(nums[-1]))
+    else:
+        for txn in nums:
+            merkleTree.append(str(txn))
+
+def computeMerkleTree():
+    global merkleTree
+    for i in range(math.ceil(len(merkleTree)/2)-1, 0, -1): # index of where to begin our concate hash
+        merkleTree[i] = str(merkleTree[2*i]) + str(merkleTree[2*i+1])
+        displayMerkleTree()
+
+
+def displayMerkleTree():
+    print(merkleTree)
+
+def validateMerkleHash():
+    # print(transaction_bytes)
+    # print("last",transactions_merkle)
+    # print("validating merkle hash")
+    hashes = []
+    # for i in range(len(block.transactions)):
+    #     print(int.from_bytes(block.transactions[i]))
+    for i in range(len(transactions_merkle)):
+        h = computeHash1(transactions_merkle[i].strip())
+        # print('\n')
+        # print(h)
+        hashes.append(h)
     
-#     # json_obj = json.dumps(bigBlock, indent=4)
-#     # print(json_obj)
+    addHashes(hashes)
+    computeMerkleTree()
+    return merkleTree[1]
 
-#     # print(d.encode)
+#-------- MERKLE TREE SECTION ---------------#
 
-#     # print("magic_number", bl.preamble.magic_number) #preamble
-#     # print("size: ", bl.preamble.size)
+def computeHash1(txn_string):
+    # print(txn_string)
+    # txn_string = bytearray(arr).hex()
+    return ''.join(format(x, '02x') for x in reversed(bytearray(sha256(sha256(bytes.fromhex(txn_string)).digest()).digest())))
 
-#     # print("header version ", bl.version) # header
-#     # print("header prev hash", bl.prev_hash)
-#     # print("merkle_root_hash: ", bl.merkle_root_hash)
-#     # print("time: ", bl.time)
-#     # print("nBits", bl.nBits)
-#     # print("nonce", bl.nonce) 
+def computeHash(arr):
+    # print(txn_string)
+    txn_string = bytearray(arr).hex()
+    return ''.join(format(x, '02x') for x in reversed(bytearray(sha256(sha256(bytes.fromhex(txn_string)).digest()).digest())))
 
-#     # print("transaction version: ", bl.transactions.version) # transaction
-#     # print("txn_in_count: ", bl.transactions.txn_in_count)
-
-#     # # print("txn_inputs: ", bl.transactions.txn_in)
-#     # print("txn_inputs: ")
-#     # for i in range(bl.transactions.txn_in_count):
-#     #     print("utxo_hash: ", bl.transactions.txn_in[i].utxo_hash)
-#     #     print("index: ", bl.transactions.txn_in[i].index)
-#     #     print("sze: ", bl.transactions.txn_in[i].input_script_size)
-#     #     print("signature script: ", bl.transactions.txn_in[i].input_script_bytes)
-#     #     print("sequence: ", bl.transactions.txn_in[i].sequence)
-#     # print("txn_output_count: ")
-#     # for i in range(bl.transactions.txn_out_count):
-#     #     print("satoshis: ", bl.transactions.txn_out[i].satoshis)
-#     #     print("output_script_size: ", bl.transactions.txn_out[i].output_script_size)
-#     #     print("output_script_bytes: ", bl.transactions.txn_out[i].output_script_bytes)
-#     # print("locktime: ", bl.transactions.lock_time)
-
-# fileName = "blk00000-f10.blk"
 file = open(fileName + ".json", mode='w')
 bigBlock = Blocks()
 height = 0
+p_hash = None
 while len(bytes_master.hex()) > 0:
     
-# while f.readline() != "":
     p = Preamble()
-    magicNumber = p.getMagicNumber()
-    size = p.getSize()
+    p.getMagicNumber()
+    p.getSize()
+   
+    current_header_hash = bytes_master[:80]
     bigBlock.getBlock(height)
+    block = bigBlock.blocks[height]
+
+    prev_block = bigBlock.blocks[height - 1]
+    if p.magic_number != magicNumber_FINAL: #error 1
+        print("error 1 block " + str(height)) 
+        exit()
+    if str(block.version) != "1": #error 2
+        print("error 2 block " + str(height))
+        exit()
+
+    c_hash = computeHash(current_header_hash)
+
+    if height >= 1 and str(block.previous_hash) != str(p_hash) : # error 3
+        print("error 3 block " + str(height))
+        exit()
+
+    d1 = datetime.strptime(block.timestamp_readable, "%Y-%m-%d %H:%M:%S%f") # error 4
+    d2 = datetime.strptime(prev_block.timestamp_readable, "%Y-%m-%d %H:%M:%S%f")
+    if height > 0 and (d2-d1).total_seconds()/3600.0 > 2:
+        print("error 4 block " + str(height))
+        exit()
+
+    for i in range(block.txn_count): # error 5
+        if block.transactions[i].version != 1:
+            print("error 5 block " + str(height))
+            exit()
+
+    merkle_hash_compute = validateMerkleHash() #error 6
+    if merkle_hash_compute.strip() != block.merkle_hash.strip():
+        print("error 6 block " + str(height))
+        exit()
+
+    transaction_bytes.clear()
+    transactions_merkle.clear()
+    merkleTree.clear()
+    merkleTree.append(None)
+
+    p_hash = c_hash
     height += 1
 
-    if height%100 == 0:
+    if height%1000 == 0:
         print(height)
+
 
 bigBlock.finalizeHeight(height)
 file.write(bigBlock.toJSON())
-
-
 file.close()
-
-
-
-
-
-
-
-
+print("no errors " + str(height) + " blocks")
