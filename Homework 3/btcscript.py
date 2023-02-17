@@ -5,6 +5,7 @@ from hashlib import sha256
 from datetime import datetime
 import math 
 
+merkleTransactions = [] # contains merkle hashes
 merkleTree = [None]
 num_txn = 0
 magicNumber_FINAL = 3652501241
@@ -293,22 +294,65 @@ def addHashes(nums): # hash later
         extraNone = [None] * (length - len(merkleTree))
         merkleTree += extraNone
         for txn in nums:
-            merkleTree.append(str(txn))
+            # print("return", computeHash(txn))
+            # print(str(txn))
+            # print(txn)
+            merkleTree.append(txn)
         if num_txn % 2 != 0:
-            merkleTree.append(str(nums[-1]))
+            merkleTree.append(nums[-1])
     else:
         for txn in nums:
-            merkleTree.append(str(txn))
+            merkleTree.append(txn)
 
 def computeMerkleTree():
     global merkleTree
     for i in range(math.ceil(len(merkleTree)/2)-1, 0, -1): # index of where to begin our concate hash
-        merkleTree[i] = str(merkleTree[2*i]) + str(merkleTree[2*i+1])
-        displayMerkleTree()
+        # merkleTree[i] = computeHash1(str(merkleTree[2*i]) + str(merkleTree[2*i+1]))
+        # print("here",merkleTree[2*i])
+
+        merkleTree[i] = binMerkle(merkleTree[2*i], merkleTree[2*i+1])
+        # print(merkleTree)
+        
+        # displayMerkleTree()
+
+
+def binMerkle(txn1, txn2):
+    # txn1_data = bytes.fromhex(txn1)
+    # txn1_hash_bin = sha256(sha256(txn1).digest()).digest()
+    # txn1_hash_hex = sha256(sha256(txn1).digest()).hexdigest()
+
+    # # print(txn1_hash_hex)
+
+    # # txn2_data = bytes.fromhex(txn2)
+    # txn2_hash_bin = sha256(sha256(txn2).digest()).digest()
+    # txn2_hash_hex = sha256(sha256(txn2).digest()).hexdigest()
+
+    # print(txn2_hash_hex)
+    # print("txn1: ",txn1, txn2)
+    # print(merkleTree)
+    print(merkleTree)
+    # if txn1 == None:
+    #     parent_hash_bin=sha256(sha256(txn2).digest()).digest()
+    # if txn2 == None:
+    #     parent_hash_bin=sha256(sha256(txn1).digest()).digest()
+    # else:
+    parent_hash_bin=sha256(sha256(txn1+txn2).digest()).digest()
+
+
+    # parent_hash_hex=sha256(sha256(txn1_hash_bin+txn2_hash_bin).digest()).hexdigest()
+    
+    return parent_hash_bin
+    # return sha256(sha256(txn_string).digest()).digest()
+
+
+def binaryHash(val):
+    txn1_data = bytes.fromhex(val)
+    txn1_hash_bin = sha256(sha256(txn1_data).digest()).digest()
+    return txn1_hash_bin
 
 
 def displayMerkleTree():
-    print(merkleTree)
+    print("merkleTree", merkleTree)
 
 def validateMerkleHash():
     # print(transaction_bytes)
@@ -317,17 +361,25 @@ def validateMerkleHash():
     hashes = []
     # for i in range(len(block.transactions)):
     #     print(int.from_bytes(block.transactions[i]))
+    # print("transactions_merkle: ", transactions_merkle)
     for i in range(len(transactions_merkle)):
-        h = computeHash1(transactions_merkle[i].strip())
+        h = binaryHash(transactions_merkle[i])
         # print('\n')
         # print(h)
         hashes.append(h)
-    
+    # print("hashes: ", hashes)
     addHashes(hashes)
     computeMerkleTree()
+    # print(merkleTree[1])
     return merkleTree[1]
 
 #-------- MERKLE TREE SECTION ---------------#
+
+def finalvalidate(val):
+    tmp = bytearray(val)
+    tmp.reverse()
+    hash = ''.join(format(x, '02x') for x in tmp)
+    return hash
 
 def computeHash1(txn_string):
     # print(txn_string)
@@ -379,20 +431,25 @@ while len(bytes_master.hex()) > 0:
             exit()
 
     merkle_hash_compute = validateMerkleHash() #error 6
-    if merkle_hash_compute.strip() != block.merkle_hash.strip():
+    if finalvalidate(merkle_hash_compute) != block.merkle_hash.strip():
         print("error 6 block " + str(height))
         exit()
+
+    # transaction_bytes.clear()
+    # transactions_merkle.clear()
+    # merkleTree.clear()
+    # merkleTree.append(None)
+
+    p_hash = c_hash
+    height += 1
 
     transaction_bytes.clear()
     transactions_merkle.clear()
     merkleTree.clear()
     merkleTree.append(None)
 
-    p_hash = c_hash
-    height += 1
-
-    if height%1000 == 0:
-        print(height)
+    # if height%1000 == 0:
+    #     print(height)
 
 
 bigBlock.finalizeHeight(height)
