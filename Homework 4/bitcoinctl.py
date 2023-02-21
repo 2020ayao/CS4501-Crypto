@@ -203,6 +203,8 @@ def handle_txn(param):
 		raise Exception("Unknown part in handle_txn():",param)
 	# which network?
 	network = 'btc-test3'
+	network = 'bcy-test'
+
 	if param in ["part4b", "part4c"]:
 		network = 'bcy-test'
 	# combine into a new transaction, and broadcast
