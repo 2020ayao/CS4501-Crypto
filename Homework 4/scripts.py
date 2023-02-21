@@ -101,8 +101,8 @@ split_amount_after_split = 0.00001
 split_into_n = int(split_amount_to_split/split_amount_after_split)
 
 # The transaction IDs obtained after successfully splitting the tBTC.
-# txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe"]
-txid_split_list = ["5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"]
+txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe"]
+# txid_split_list = ["5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"]
 
 #------------------------------------------------------------
 # Global settings: some of these will need to be changed for EACH RUN
