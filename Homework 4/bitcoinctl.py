@@ -126,8 +126,7 @@ def create_signed_transaction(txin, txout, txin_scriptPubKey,
 	txin.scriptSig = CScript(txin_scriptSig)
 	#print(txin, "\n\n", txout, "\n\n", txin_scriptPubKey, "\n\n", txin_scriptSig)
 	if verify_script:
-	    VerifyScript(txin.scriptSig, CScript(txin_scriptPubKey),
-	                 tx, 0, (SCRIPT_VERIFY_P2SH,))
+		VerifyScript(txin.scriptSig, CScript(txin_scriptPubKey),tx, 0, (SCRIPT_VERIFY_P2SH,))
 	return tx
 
 

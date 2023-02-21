@@ -37,18 +37,18 @@ if __name__ == '__main__':
 # Setup: your information
 
 # Your UVA userid
-userid = ''
+userid = 'aly3ye'
 
 # Enter the BTC private key and invoice address from the setup 'Testnet Setup'
 # section of the assignment.  
-my_private_key_str = ""
-my_invoice_address_str = ""
+my_private_key_str = "cPa4NtNoigcafoVtxar2tmvF1FJhznYqXYp4rzUWWuPVHrnpGr1K"
+my_invoice_address_str = "mzajXQKtMBBj44XRoZSmGZnEM8zKe3ZdnG"
 
 # Enter the transaction ids (TXID) from the funding part of the 'Testnet
 # Setup' section of the assignment.  Each of these was provided from a faucet
 # call.  And obviously replace the empty string in the list with the first
-# one you botain..
-txid_funding_list = [""]
+# one you obtain..
+txid_funding_list = ["762a0ab786e5ed6521d0a8a2fe092db2f5ec33dcabb5fe04cf879a014ae423c3"]
 
 # These conversions are so that you can use them more easily in the functions
 # below -- don't change these two lines.
@@ -87,11 +87,13 @@ txid_split = txid_funding_list[0]
 # amount specified in this variable. That amount should not be less than
 # 0.0001 BTC, and can be greater.  It will make your life easier if each
 # amount is a negative power of 10, but that's not required.
-split_amount_to_split = 0.01
+# split_amount_to_split = 0.01077763
+split_amount_to_split = 0.001
 
 # How much BTC is in that UTXO; look this up on https://live.blockcypher.com
 # to get the correct amount.
-split_amount_after_split = 0.001
+# split_amount_after_split = 0.001
+split_amount_after_split = 0.00001
 
 # How many UTXO indices to split it into -- you should not have to change
 # this!  Note that it will actually split into one less, and use the last one
@@ -99,8 +101,8 @@ split_amount_after_split = 0.001
 split_into_n = int(split_amount_to_split/split_amount_after_split)
 
 # The transaction IDs obtained after successfully splitting the tBTC.
-txid_split_list = [""]
-
+txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe"]
+# txid_split_list = ["5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"]
 
 #------------------------------------------------------------
 # Global settings: some of these will need to be changed for EACH RUN
@@ -136,7 +138,11 @@ send_amount = split_amount_after_split * 0.9
 #   P2PKHBitcoinAddress
 def P2PKH_scriptPubKey(address):
     return [ 
-             # fill this in
+            OP_DUP,
+            OP_HASH160,
+            address, 
+            OP_EQUALVERIFY,
+            OP_CHECKSIG
            ]
 
 # This function provides the sigscript (aka input script) for the transaction
@@ -151,12 +157,26 @@ def P2PKH_scriptPubKey(address):
 # - private_key: the private key of the redeemer of the UTXO; type:
 #   CBitcoinSecret
 def P2PKH_scriptSig(txin, txout, txin_scriptPubKey, private_key):
+    # print("txin: ", txin)
+    # print("txout: " txout)
+    # print("txin_scriptPubKey: ", txin_scriptPubKey)
+    # print("private_key: ", private_key)
+
+    tx = CMutableTransaction([txin], [txout])
+    sighash = SignatureHash(CScript(txin_scriptPubKey), tx, 0, SIGHASH_ALL)
+    sig = private_key.sign(sighash) + bytes([SIGHASH_ALL])
+
+    priv_key = CBitcoinSecret(str(private_key))
+    public_key = priv_key.pub
+
+
     return [ 
-             # fill this in
+             sig, 
+             public_key
            ]
 
 # The transaction hash received after the successful execution of this part
-txid_p2pkh = ""
+txid_p2pkh = "b48f39b664edd51ca6c0e0a25d7e670a036cb595c2fea26259effaf01ae05bb9"
 
 
 #------------------------------------------------------------
@@ -165,20 +185,28 @@ txid_p2pkh = ""
 # These two values are constants that you should choose -- they should be four
 # digits long.  They need to allow for only integer solutions to the linear
 # equations specified in the assignment.
-puzzle_txn_p = 0
-puzzle_txn_q = 0
+puzzle_txn_p = 4231
+puzzle_txn_q = 6953
 
 # These are the solutions to the linear equations specified in the homework
 # assignment.  You can use an online linear equation solver to find the
 # solutions.
-puzzle_txn_x = 0
-puzzle_txn_y = 0
+puzzle_txn_x = 1509
+puzzle_txn_y = 2722
 
 # This function provides the pubKey script (aka output script) that requres a
 # solution to the above equations to redeem this UTXO.
 def puzzle_scriptPubKey():
     return [ 
-             # fill this in
+                OP_2DUP,
+                OP_ADD,
+                puzzle_txn_p,
+                OP_EQUALVERIFY,
+                OP_DUP,
+                OP_ADD,
+                OP_ADD,
+                puzzle_txn_q,
+                OP_EQUAL
            ]
 
 # This function provides the sigscript (aka input script) for the transaction
@@ -186,16 +214,17 @@ def puzzle_scriptPubKey():
 # in the order of your choice.
 def puzzle_scriptSig():
     return [ 
-             # fill this in
+             puzzle_txn_x,
+             puzzle_txn_y
            ]
 
 # The transaction hash received after successfully submitting the first
 # transaction above (part 2a)
-txid_puzzle_txn1 = ""
+txid_puzzle_txn1 = "023f328c41bb423f60a0347812cb8eae599e31f1d0af5a6d7f4860537589c22e"
 
 # The transaction hash received after successfully submitting the second
 # transaction above (part 2b)
-txid_puzzle_txn2 = ""
+txid_puzzle_txn2 = "dbea7aa0e4f49e72e2c646e194a62c767582911438e7932e29323ae823ba0784"
 
 
 #------------------------------------------------------------
@@ -203,12 +232,12 @@ txid_puzzle_txn2 = ""
 
 # These are the public and private keys that need to be created for alice,
 # bob, and charlie
-alice_private_key_str = ""
-alice_invoice_address_str = ""
-bob_private_key_str = ""
-bob_invoice_address_str = ""
-charlie_private_key_str = ""
-charlie_invoice_address_str = ""
+alice_private_key_str = "cT9KD8WJGmRqpFQ2mhvv7ZjeWXp4D3YNx4bEohFXmxeepL63WP9V"
+alice_invoice_address_str = "n4cDyydKfbziiZTV7g8twRGQSULdGRumob"
+bob_private_key_str = "cNrFbrk7RuSYAwFCaXDL5KmJdTLCMv2GkKUqFCj87qmeroXK1Vx9"
+bob_invoice_address_str = "msb7kQUgCuQVuvy5FUSj5kBMTibjLwnQ9a"
+charlie_private_key_str = "cVPMnRzZ3pHMqhAazgY4ZBYbSS3qBLYCFTD5Fhu5gxXem43pTekZ"
+charlie_invoice_address_str = "n4cjVnnEmKekTLJimQhVLhat1vgLGZMqFC"
 
 # These three lines convert the above strings into the type that is usable in
 # a script -- you should NOT modify these lines.
@@ -225,8 +254,20 @@ if charlie_private_key_str != "":
 # function, you should use the keys above for alice, bob, and charlie, as
 # well as your own key.
 def multisig_scriptPubKey():
-    return [ 
-            # fill this in
+    return [
+            # OP_DUP,
+            # OP_HASH160,
+            # my_invoice_address_bcy_str, 
+            # OP_EQUALVERIFY,
+            # OP_CHECKSIGVERIFY,
+            my_private_key.pub,
+            OP_CHECKSIGVERIFY,
+            alice_private_key.pub,
+            bob_private_key.pub,
+            charlie_private_key.pub,
+            OP_3,
+            OP_CHECKMULTISIGVERIFY,
+            OP_1            
            ]
 
 # This function provides the sigScript (aka input script) that can redeem the
@@ -239,17 +280,27 @@ def multisig_scriptSig(txin, txout, txin_scriptPubKey):
     alice_sig = create_CHECKSIG_signature(txin, txout, txin_scriptPubKey, alice_private_key)
     bob_sig = create_CHECKSIG_signature(txin, txout, txin_scriptPubKey, bob_private_key)
     charlie_sig = create_CHECKSIG_signature(txin, txout, txin_scriptPubKey, charlie_private_key)
+    
+
+
+    # tx = CMutableTransaction([txin], [txout])
+    # sighash = SignatureHash(CScript(txin_scriptPubKey), tx, 0, SIGHASH_ALL)
+    # sig = my_private_key.sign(sighash) + bytes([SIGHASH_ALL])
     return [ 
-             # fill this in
+            OP_0, 
+            alice_sig, 
+            bob_sig,
+            OP_2, 
+            bank_sig
            ]
 
 # The transaction hash received after successfully submitting the first
 # transaction above (part 3a)
-txid_multisig_txn1 = ""
+txid_multisig_txn1 = "26ee1fbf4b71ceedf5b0556e7b6b4d002bec80e95d42c9c1d428c3ecfec5c90f"
 
 # The transaction hash received after successfully submitting the second
 # transaction above (part 3b)
-txid_multisig_txn2 = ""
+txid_multisig_txn2 = "86531e0bfeb4891f5b289811e3e75301534fd425f1a61ac694026ea941d8dad6"
 
 
 #------------------------------------------------------------
@@ -258,26 +309,31 @@ txid_multisig_txn2 = ""
 # This is the API token obtained after creating an account on
 # https://accounts.blockcypher.com/.  This is optional!  But you may want to
 # keep it here so that everything is all in once place.
-blockcypher_api_token = ""
+blockcypher_api_token = "7bd7459f6b17467e8c957bd7d4ffff82"
 
 # These are the private keys and invoice addresses obtained on the BCY test
 # network.
-my_private_key_bcy_str = ""
-my_invoice_address_bcy_str = ""
-bob_private_key_bcy_str = ""
-bob_invoice_address_bcy_str = ""
+my_private_key_bcy_str = "427700c38876c5884bf278656511e8854e2be129ccf1df5d5517190fe0f6a675"
+my_public_key_bcy_str = "02360119a74be891172ddba150a3d25d04746db12caacb49e83788084a25bb3c91"
+my_invoice_address_bcy_str = "CDhgFrtP1hzWuRastYPLfwYC4Rc3Y8XRfd"
+my_wif_bcy_str = "BqZEHCMcEQKzkyTbjYFcwtSFiUfoDAvKrbr3ZDpGb9Fo6avLbNVH"
+
+bob_private_key_bcy_str = "63662e2c4854db62d0181f01f96b75fb6f14ddf6314df6fb980bc65a8ac4b45d"
+bob_public_key_bcy_str = "02c48110e2a24602897314a7dc58363591c2387bd0e54abfa11d3128cd4c1bac01"
+bob_invoice_address_bcy_str = "CAovP4qeJh46r4CXUvWb7spqrxjvA5zBbq"
+bob_wif_bcy_str = "BrfFSJkjyDb2JzviZNDZZUziDocSxAi1nmxewE7kJRditB3RZtEq"
 
 # This is the transaction hash for the funding transaction for Bob's BCY
 # network wallet.
-txid_bob_bcy_funding = ""
+txid_bob_bcy_funding = "e0068a7f630e71b6352302bac8e7bb414d933ff76109c0410a153bfe01d96984"
 
 # This is the transaction hash for the split transaction for the trasnaction
 # above.
-txid_bob_bcy_split = ""
+txid_bob_bcy_split = "5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"
 
 # This is the secret used in this atomic swap.  It needs to be between 1 million
 # and 2 billion.
-atomic_swap_secret = 0
+atomic_swap_secret = 1566038372
 
 # This function provides the pubKey script (aka output script) that will set
 # up the atomic swap.  This function is run by both Alice (aka you) and Bob,
@@ -286,7 +342,19 @@ atomic_swap_secret = 0
 # http://aaronbloomfield.github.io/ccc/slides/bitcoin.html#/xchainpt1.
 def atomicswap_scriptPubKey(public_key_sender, public_key_recipient, hash_of_secret):
     return [ 
-             # fill this in
+            OP_IF,
+            OP_HASH160,
+            hash_of_secret,
+            OP_EQUALVERIFY,
+            public_key_recipient,
+            OP_CHECKSIG,
+
+            OP_ELSE,
+            public_key_sender,
+            OP_CHECKSIGVERIFY,
+            public_key_recipient,
+            OP_CHECKSIG,
+            OP_ENDIF
            ]
 
 # This is the ScriptSig that the receiver will use to redeem coins.  It's
@@ -313,16 +381,16 @@ def atomcswap_scriptSig_refund(sig_sender, sig_recipient):
     ]
 
 # The transaction hash received after successfully submitting part 4a
-txid_atomicswap_alice_send_tbtc = ""
+txid_atomicswap_alice_send_tbtc = "6eaaa3a0d303e35311345cbf026d2f82b85d2f43bb75837e5bae5c83e64fa39a"
 
 # The transaction hash received after successfully submitting part 4b
-txid_atomicswap_bob_send_bcy = ""
+txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3"
 
 # The transaction hash received after successfully submitting part 4c
-txid_atomicswap_alice_redeem_bcy = ""
+txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc"
 
 # The transaction hash received after successfully submitting part 4d
-txid_atomicswap_bob_redeem_tbtc = ""
+txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710"
 
 
 #------------------------------------------------------------
