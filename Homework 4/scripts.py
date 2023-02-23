@@ -41,14 +41,14 @@ userid = 'aly3ye'
 
 # Enter the BTC private key and invoice address from the setup 'Testnet Setup'
 # section of the assignment.  
-my_private_key_str = "cPa4NtNoigcafoVtxar2tmvF1FJhznYqXYp4rzUWWuPVHrnpGr1K"
-my_invoice_address_str = "mzajXQKtMBBj44XRoZSmGZnEM8zKe3ZdnG"
+my_private_key_str = "cSD3PkXAxnTtmuZzsteECzABsJAPDWwV7WxexHgVt3dUKyjRk4uz"
+my_invoice_address_str = "mrfpiWovx1gThFoTqaBaqk2B4iWXLCrnQC"
 
 # Enter the transaction ids (TXID) from the funding part of the 'Testnet
 # Setup' section of the assignment.  Each of these was provided from a faucet
 # call.  And obviously replace the empty string in the list with the first
 # one you obtain..
-txid_funding_list = ["762a0ab786e5ed6521d0a8a2fe092db2f5ec33dcabb5fe04cf879a014ae423c3", "88459d0677cf498948f4495b901a96e7a007708b2fcadd47534718e8842b9dd4", "7f5a7ec2de19ca09c990abeaea1f9a5b39abeaf8f1da1ac28bad5ef4245ffb7d", "8fd87e3bd05544c42216647b8145d4a07b61216b5b8831c0a03c068bb823ea4f"]
+txid_funding_list = ["b93b241b73f5daac3781d10b111505588a5f1975dffbcbdad0ce576e9574a66f"]
 
 # These conversions are so that you can use them more easily in the functions
 # below -- don't change these two lines.
@@ -81,19 +81,21 @@ def create_CHECKSIG_signature(txin, txout, txin_scriptPubKey, private_key):
 # to split multiple UTXOs, so if you are splitting a different faucet
 # transaction, then change this appropriately. It must have been paid to the
 # address that corresponds to the private key above
-txid_split = txid_funding_list[3]
+txid_split = txid_funding_list[0]
 
 # After all the splits, you should have around 10 (or more) UTXOs, all for the
 # amount specified in this variable. That amount should not be less than
 # 0.0001 BTC, and can be greater.  It will make your life easier if each
 # amount is a negative power of 10, but that's not required.
 # split_amount_to_split = 0.01077763
-split_amount_to_split = 0.01431473
+# split_amount_to_split = 0.01431473
+split_amount_to_split = 0.001
+
 
 # How much BTC is in that UTXO; look this up on https://live.blockcypher.com
 # to get the correct amount.
-split_amount_after_split = 0.001
-# split_amount_after_split = 0.00001
+# split_amount_after_split = 0.001
+split_amount_after_split = 0.0001
 
 # How many UTXO indices to split it into -- you should not have to change
 # this!  Note that it will actually split into one less, and use the last one
@@ -101,7 +103,7 @@ split_amount_after_split = 0.001
 split_into_n = int(split_amount_to_split/split_amount_after_split)
 
 # The transaction IDs obtained after successfully splitting the tBTC.
-txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe", "b144a7df842b955a99c7ed3901d77e5aa0495acb0a109dcbfa76bb88b30d9451", "04b15412418ffa61f822e60d881e89e2e446f4c43b8652a889e4c2d0535eab40"]
+txid_split_list = ["6dc308d377cbb2487189676e44444beb31fce8c324064f8055a5b83f6192be08"]
 # txid_split_list = ["5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"]
 
 #------------------------------------------------------------
@@ -110,7 +112,7 @@ txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21
 # The transaction ID that is being redeemed for the various parts herein --
 # this should be the result of the split transaction, above; thus, the
 # default is probably sufficient.
-txid_utxo = txid_split_list[1]
+txid_utxo = txid_split_list[0]
 
 # This is likely not needed.  The bitcoinctl.py will take a second
 # command-line parmaeter, which will override this value.  You should use the
@@ -176,7 +178,7 @@ def P2PKH_scriptSig(txin, txout, txin_scriptPubKey, private_key):
            ]
 
 # The transaction hash received after the successful execution of this part
-txid_p2pkh = "b48f39b664edd51ca6c0e0a25d7e670a036cb595c2fea26259effaf01ae05bb9"
+txid_p2pkh = "640fc2e2d01af0d87bac70fd17c7792bda176296b144b211530f62c0142f5e08"
 
 
 #------------------------------------------------------------
@@ -220,11 +222,11 @@ def puzzle_scriptSig():
 
 # The transaction hash received after successfully submitting the first
 # transaction above (part 2a)
-txid_puzzle_txn1 = "023f328c41bb423f60a0347812cb8eae599e31f1d0af5a6d7f4860537589c22e"
+txid_puzzle_txn1 = "9e304c0ba6570a84775fdc1a34bf15f6f5c56464ef673e5f806c67e1c7999f30"
 
 # The transaction hash received after successfully submitting the second
 # transaction above (part 2b)
-txid_puzzle_txn2 = "dbea7aa0e4f49e72e2c646e194a62c767582911438e7932e29323ae823ba0784"
+txid_puzzle_txn2 = "14d7eff48252c6a18d0c23dc6cf9d16d8bfb5a484156ac941f24f4c4ba30a1e5"
 
 
 #------------------------------------------------------------
@@ -296,11 +298,11 @@ def multisig_scriptSig(txin, txout, txin_scriptPubKey):
 
 # The transaction hash received after successfully submitting the first
 # transaction above (part 3a)
-txid_multisig_txn1 = "26ee1fbf4b71ceedf5b0556e7b6b4d002bec80e95d42c9c1d428c3ecfec5c90f"
+txid_multisig_txn1 = "0847db52dc61c2ba1bc937dde44d55fdd133424926a8187547dd466aa00ed536"
 
 # The transaction hash received after successfully submitting the second
 # transaction above (part 3b)
-txid_multisig_txn2 = "86531e0bfeb4891f5b289811e3e75301534fd425f1a61ac694026ea941d8dad6"
+txid_multisig_txn2 = "ca9f5b62753cc3be4e51cdf4ae941f6b336a50b579473b2d26531f8506c4ae32"
 
 
 #------------------------------------------------------------
@@ -309,27 +311,27 @@ txid_multisig_txn2 = "86531e0bfeb4891f5b289811e3e75301534fd425f1a61ac694026ea941
 # This is the API token obtained after creating an account on
 # https://accounts.blockcypher.com/.  This is optional!  But you may want to
 # keep it here so that everything is all in once place.
-blockcypher_api_token = "7bd7459f6b17467e8c957bd7d4ffff82"
+blockcypher_api_token = "44804a9f95644b9c87035afa2bb26c0e"
 
 # These are the private keys and invoice addresses obtained on the BCY test
 # network.
-my_private_key_bcy_str = "427700c38876c5884bf278656511e8854e2be129ccf1df5d5517190fe0f6a675"
-my_public_key_bcy_str = "02360119a74be891172ddba150a3d25d04746db12caacb49e83788084a25bb3c91"
-my_invoice_address_bcy_str = "CDhgFrtP1hzWuRastYPLfwYC4Rc3Y8XRfd"
-my_wif_bcy_str = "BqZEHCMcEQKzkyTbjYFcwtSFiUfoDAvKrbr3ZDpGb9Fo6avLbNVH"
+my_private_key_bcy_str = "bedf5ef48ade725226a935a9e6681f2dd6604a0568d4b2e1a804478ced661965"
+my_public_key_bcy_str = "024b0b7dc335e2ccc704320c3db0f496fa3ce9dc4aa53f61b01567c395b3357cfe"
+my_invoice_address_bcy_str = "C66LaEG2eMYd1DJachLpqm1h3rig5cg1Vq"
+my_wif_bcy_str = "Buj4Z1ZVSMafTNiX3jEXwsZEa18KGtcWoqdD1ZrmWjzZqo8o1BY4"
 
-bob_private_key_bcy_str = "63662e2c4854db62d0181f01f96b75fb6f14ddf6314df6fb980bc65a8ac4b45d"
-bob_public_key_bcy_str = "02c48110e2a24602897314a7dc58363591c2387bd0e54abfa11d3128cd4c1bac01"
-bob_invoice_address_bcy_str = "CAovP4qeJh46r4CXUvWb7spqrxjvA5zBbq"
-bob_wif_bcy_str = "BrfFSJkjyDb2JzviZNDZZUziDocSxAi1nmxewE7kJRditB3RZtEq"
+bob_private_key_bcy_str = "ab1ed9adcc37e922459054f17f2f9fcdd4b4835643b4c193d1a47aa1ef572665"
+bob_public_key_bcy_str = "03b070363335c39867060fd56a9e5b949601742780fe91211bc01c277a27f3f3e6"
+bob_invoice_address_bcy_str = "CGMP4jLG74hotRxpHbHAH9RFkgU7NyZ9yx"
+bob_wif_bcy_str = "Bu4fcygPSam8AYJErYrbzvH9UGEnKTwGwPxs4XppJmdAXoqGvDLY"
 
 # This is the transaction hash for the funding transaction for Bob's BCY
 # network wallet.
-txid_bob_bcy_funding = "e0068a7f630e71b6352302bac8e7bb414d933ff76109c0410a153bfe01d96984"
+txid_bob_bcy_funding = "cf93df9a1624943b03630b983985551b3c7fb1510b6b06d5ee040ff175f586c4"
 
 # This is the transaction hash for the split transaction for the trasnaction
 # above.
-txid_bob_bcy_split = "5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"
+txid_bob_bcy_split = "6bd186c723c4c02eafd641ed80605a43360d3cfe2aab143e69441a04fd160330"
 
 # This is the secret used in this atomic swap.  It needs to be between 1 million
 # and 2 billion.
@@ -381,19 +383,19 @@ def atomcswap_scriptSig_refund(sig_sender, sig_recipient):
     ]
 
 # The transaction hash received after successfully submitting part 4a
-txid_atomicswap_alice_send_tbtc = "6eaaa3a0d303e35311345cbf026d2f82b85d2f43bb75837e5bae5c83e64fa39a" # round1 
+txid_atomicswap_alice_send_tbtc = "1929ae6d45656249a32d247619fe7b0deab8e1e33f7483f28d6884eef9cfe5d2" # round1 
 # txid_atomicswap_alice_send_tbtc = "cb5eccc538424c63c3ec9f65f7733fab518922c5445ed70fd9096febdee9929f" # round2
 
 # The transaction hash received after successfully submitting part 4b
-txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3" # round1 
+txid_atomicswap_bob_send_bcy = "c55293afcc7d168caa99bf18fcfd6f467145e0946ae4c762966578502f8dcdd7" # round1 
 # txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3" # round2
 
 # The transaction hash received after successfully submitting part 4c
-txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc" # round1 
+txid_atomicswap_alice_redeem_bcy = "b013f406ba26dde26e0bd39fa23206e79f6a7d2f9ca89088b1bf855d1347d1f1" # round1 
 # txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc" # round2
 
 # The transaction hash received after successfully submitting part 4d
-txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710" # round1 
+txid_atomicswap_bob_redeem_tbtc = "225c99a47f5068527b5b324d0c48c07875f59e3cfb52ac520f847b07413e4e88" # round1 
 # txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710" #round2
 
 # txid_atomicswap_bob_redeem_tbtc = "63b98482ee556755c3f2cb5c10fc82707a7c6056b6913c59a142bee76bc60055"
