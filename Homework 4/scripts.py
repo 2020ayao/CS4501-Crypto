@@ -48,7 +48,7 @@ my_invoice_address_str = "mzajXQKtMBBj44XRoZSmGZnEM8zKe3ZdnG"
 # Setup' section of the assignment.  Each of these was provided from a faucet
 # call.  And obviously replace the empty string in the list with the first
 # one you obtain..
-txid_funding_list = ["762a0ab786e5ed6521d0a8a2fe092db2f5ec33dcabb5fe04cf879a014ae423c3"]
+txid_funding_list = ["762a0ab786e5ed6521d0a8a2fe092db2f5ec33dcabb5fe04cf879a014ae423c3", "88459d0677cf498948f4495b901a96e7a007708b2fcadd47534718e8842b9dd4", "7f5a7ec2de19ca09c990abeaea1f9a5b39abeaf8f1da1ac28bad5ef4245ffb7d", "8fd87e3bd05544c42216647b8145d4a07b61216b5b8831c0a03c068bb823ea4f"]
 
 # These conversions are so that you can use them more easily in the functions
 # below -- don't change these two lines.
@@ -81,19 +81,19 @@ def create_CHECKSIG_signature(txin, txout, txin_scriptPubKey, private_key):
 # to split multiple UTXOs, so if you are splitting a different faucet
 # transaction, then change this appropriately. It must have been paid to the
 # address that corresponds to the private key above
-txid_split = txid_funding_list[0]
+txid_split = txid_funding_list[3]
 
 # After all the splits, you should have around 10 (or more) UTXOs, all for the
 # amount specified in this variable. That amount should not be less than
 # 0.0001 BTC, and can be greater.  It will make your life easier if each
 # amount is a negative power of 10, but that's not required.
 # split_amount_to_split = 0.01077763
-split_amount_to_split = 0.001
+split_amount_to_split = 0.01431473
 
 # How much BTC is in that UTXO; look this up on https://live.blockcypher.com
 # to get the correct amount.
-# split_amount_after_split = 0.001
-split_amount_after_split = 0.00001
+split_amount_after_split = 0.001
+# split_amount_after_split = 0.00001
 
 # How many UTXO indices to split it into -- you should not have to change
 # this!  Note that it will actually split into one less, and use the last one
@@ -101,7 +101,7 @@ split_amount_after_split = 0.00001
 split_into_n = int(split_amount_to_split/split_amount_after_split)
 
 # The transaction IDs obtained after successfully splitting the tBTC.
-txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe"]
+txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21fbbe", "b144a7df842b955a99c7ed3901d77e5aa0495acb0a109dcbfa76bb88b30d9451", "04b15412418ffa61f822e60d881e89e2e446f4c43b8652a889e4c2d0535eab40"]
 # txid_split_list = ["5a6e69ed40592a13ad4effbf8cc7644ff0dc8691697c88809c20e54a78093278"]
 
 #------------------------------------------------------------
@@ -110,7 +110,7 @@ txid_split_list = ["cb5b9a7460b95771120b1ac347755aed7de5c8084319e14958bb18fb6d21
 # The transaction ID that is being redeemed for the various parts herein --
 # this should be the result of the split transaction, above; thus, the
 # default is probably sufficient.
-txid_utxo = txid_split_list[0]
+txid_utxo = txid_split_list[1]
 
 # This is likely not needed.  The bitcoinctl.py will take a second
 # command-line parmaeter, which will override this value.  You should use the
@@ -381,17 +381,22 @@ def atomcswap_scriptSig_refund(sig_sender, sig_recipient):
     ]
 
 # The transaction hash received after successfully submitting part 4a
-txid_atomicswap_alice_send_tbtc = "6eaaa3a0d303e35311345cbf026d2f82b85d2f43bb75837e5bae5c83e64fa39a"
+txid_atomicswap_alice_send_tbtc = "6eaaa3a0d303e35311345cbf026d2f82b85d2f43bb75837e5bae5c83e64fa39a" # round1 
+# txid_atomicswap_alice_send_tbtc = "cb5eccc538424c63c3ec9f65f7733fab518922c5445ed70fd9096febdee9929f" # round2
 
 # The transaction hash received after successfully submitting part 4b
-txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3"
+txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3" # round1 
+# txid_atomicswap_bob_send_bcy = "fc723cfe95df8b530ae73acc2ddd066a475c1d96d9d969f3a6fea9f21dc6e3c3" # round2
 
 # The transaction hash received after successfully submitting part 4c
-txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc"
+txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc" # round1 
+# txid_atomicswap_alice_redeem_bcy = "9e5db35132c69887a20ef8c6e2ded884f6d9054629406ccb0d0ed7d5fccd8fbc" # round2
 
 # The transaction hash received after successfully submitting part 4d
-txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710"
+txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710" # round1 
+# txid_atomicswap_bob_redeem_tbtc = "c2881b6f50f7a866cc77f24bb64857745d1561137b576b9f2ca2eb4f6cb3e710" #round2
 
+# txid_atomicswap_bob_redeem_tbtc = "63b98482ee556755c3f2cb5c10fc82707a7c6056b6913c59a142bee76bc60055"
 
 #------------------------------------------------------------
 # part 5: return everything to the faucet
