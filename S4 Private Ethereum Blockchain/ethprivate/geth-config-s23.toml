@@ -1,0 +1,41 @@
+# This is the geth configuration file for the spring 2023 version of CS 4501:
+# Cryptocurrency
+
+# You need to change three values in this file; search for "CHANGE ME"
+# (without the quotes) to find those values.
+
+[Eth]
+NetworkId = 67834503
+SyncMode = "full"
+NoPruning = true
+Preimages = true
+EnablePreimageRecording = true
+EthDiscoveryURLs = []
+SnapDiscoveryURLs = []
+
+[Node]
+# CHANGE ME to your UVA userid
+UserIdent = "aly3ye"
+# CHANGE ME to the full path name of your data directory.  Absolute paths will
+# work better here.  A Windows directory will be of the form:
+# DataDir = "c:/users/mst3k/geth"
+DataDir = "/Users/adamyao/Developer/CS4501 - Crypto /S4 Private Ethereum Blockchain/ethprivate"
+HTTPHost = "127.0.0.1"
+# CHANGE ME: In HW S5, you should maek this change; you won't know this value
+# in HW S4. Change the packacge:// part only if you are using Desktop Remix,
+# and then only change it to the value that the pop-up window tells you to use.
+HTTPCors = ["https://remix.ethereum.org", "package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod"]
+HTTPPort = 8545
+HTTPModules = ["net", "web3", "eth"]
+HTTPVirtualHosts = ["localhost"]
+WSHost = "127.0.0.1"
+WSPort = 8546
+WSModules = ["net", "web3", "eth"]
+WSOrigins = ["localhost", "127.0.0.1"]
+InsecureUnlockAllowed = true
+AllowUnprotectedTxs = true
+
+[Node.P2P]
+NoDiscovery = true
+StaticNodes = ["enode://e27eb4316f667e4c24dc9a107345576147b6400726a82cd5049bd5841521048aa03e3bcf549e6ea4b60a338e92bb260111b39dd326c23dfe8fed5644d17dc5b0@128.143.67.84:30303"]
+MaxPeers = 1
