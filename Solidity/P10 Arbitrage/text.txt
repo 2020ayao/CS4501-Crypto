@@ -1,0 +1,212 @@
+
+
+This is the second part of the APM, a thirty one lecture on the analysis of variance as we learned in the first lecture. We are addressing a problem in which we have several different populations or sometimes known as treatments, and we wish to determine whether or not the means of these different populations are equal or are there at least two means which are different. We developed notation for the problem. We discussed various sunshine's that we need to make in order to apply our analysis of Variance . We discussed various statistics that we will
+calculate in trying to determine whether or not to reject our null hypothesis.
+And these statistics involve measures of variability. And we discussed
+some of the aspects of these notions of measures of variability.
+Assess T SS E SS You are we defined two
+additional statistics based upon our SS TR and SS E statistics,
+the MSP R and MSCI statistics. We take their ratio and use
+this as the test statistic involving an upper sided F test.
+Try to determine whether or not we have robust evidence that we can reject our null hypothesis.
+The null apotheosis is that our population means equal. Do we have robust
+evidence at a given significance level that at least two of our population
+are different? Again, we use an upper sided F test in terms of our
+analysis variance. We work through a problem involving
+the modernly of elasticity for grades. No. In this particular problem we did not
+have evidence, at least at the significance level suggested a point zero one
+that the modestly differed. So what we want to do now is to look at a situation
+where, let's say that we find robust evidence at some specified significance level.
+That suggests that indeed, at least two of our population means.
+How might we discern which of our population have different means?
+The procedure or test we will use is associated with the great American statistician
+John tukey. And this is known as two-piece Procedure. This is described
+in the Debord textbook. The tukey procedure is based on a very,
+very difficult, opposite, difficult proposition.
+Associated with John tukey that allows us to put simultaneous confidence
+intervals around differences in population means
+based upon this this theorem that tukey
+developed, we can develop a test, a very simple test actually
+to try to determine whether or not we think we have robust evidence at a given significance level
+to population means differ in the way we do. This is let us say that we have rejected
+the null hypothesis that a given significance level alpha the way we proceed is we
+will array our sample means from least to greatest and to
+make the notation much easier to deal with. Let's assume that
+in this particular case that the first sample mean is less than or
+equal to the second sample mean. I should say the first population sample mean is less than or equal.
+Second population sample B which is less than or equal to dot dot the
+i's population sample mean we array each sample mean from least
+to greatest. We then calculate a value w which is
+the product of a critical value associated with something called a student sized range
+distribution or significance level alpha  i
+numerator degrees of freedom and I times J minus one denominator
+degrees of freedom. We take that critical value for the student sized range distribution.
+We multiply it by the square root of our immense E statistic divided by
+J where J represents our sample size. So we calculate its number w
+by the way, the values critical values for the student size range distribution. We have a table
+of those values in our textbooks. We calculate this value w
+we start with the difference between the second
+population sample mean and the first population sample. If those two
+values differ by less than or equal to W, we will connect the
+first population sample mean in the second population sample mean with a line. We
+will draw the inference because we connect these two sample means values with
+a line that add significance level alpha. We don't have
+good evidence that the underlying population means will differ. In other words, if we can connect
+two sample means by virtue of a line. Then we will draw
+the inference that at least its significance level alpha. We don't have evidence that
+the two populations. The associated population means differ. If, on the other hand,
+if we cannot connect to sample means via a line,
+we will draw the inference that its significance level alpha. We do have a difference between
+the underlying population means. So let's assume that X to
+bar minus X one bar is less than or equal to W. We connect those two sample
+means with a line. We then move up the chain to see well what about
+sample mean associate with the third population minus the sample mean associated with the population.
+If those two numbers are less than or equal to W. Now we connect all three
+of these sample mean with a line. Again, we will infer from this that
+at least its significance level alpha. We don't have evidence that the underlying population
+means that these three populations differ. We will continue testing the sample
+mean for the iwth population, minus the sample mean for the first population. Until either we find
+a point where the difference exceeds the value W or where we go
+all the way up the line and we show that none of the sample means
+X IBRD bar minus X one bar is different or is less that is give me is greater than or
+equal to w all of these values are less than or equal to double. If that latter situation
+occurs, in other words, for every sample mean we have. If the value of the sample mean
+for the ie population minus the sample mean for the first population, that's less than the W
+then we don't have evidence at significant level that any of our population means
+differ. If, on the other hand, we find a couple of sample means
+for which the larger minus the lesser is greater than you, then
+add significance level alpha. We do have what we consider to be robust evidence
+that the associated population means differ. I will note incidentally, that
+the formal description that I've given here in terms of the PowerPoint slides, it's a
+little opaque when you first look through it. It's actually
+quite an easy idea once you see it demonstrated and we're going to work on a problem
+in just a moment that will illustrate that this is actually a pretty simple idea. But
+when you try to describe it formally, it's a little cumbersome to get through.
+Again, the key point here is if you have two sample means that cannot be
+connected, be a line. In other words, if you take the larger minus the lesser and that
+number is less than three. If that number is greater than or equal to W I should say greater than W.
+Then you have evidence at significant level alpha of a difference in population means.
+If, on the other hand, the two sample means we take the larger minus the smaller.
+If that difference is less than or equal to the value w we calculated at least
+at significance level alpha, we don't have robust evidence that the associated population
+means. And again, it's just a lot easier to work a problem
+and see how this process works. So in looking at Problem 
+from section ten point one in the divorce text, we have a situation where we have four different
+cereal grains, wheat, barley, maize and oats. We're interested in the average thiamin
+content in these different grains. So the table of values you're given here in the PowerPoint
+are four six samples for each of the four different types of cereal grains.
+What are the thiamin contents in each one of those samples? So we're given
+four populations. So our capital equals four. We're given six samples per population
+or capital J equals six. If we look at each sample variances
+calculated from the data we have here, it's not immediately obvious
+that we should conclude that the populations have the same variance. On
+one hand, the absolute value of the difference between the largest
+sample variance. And the smallest sample variance is not very large.
+On the other hand, if you look at it slightly differently, if you look at the
+sample variance for the third population, it is less than half the sample
+variance for the fourth population. As I noted in the previous lecture,
+I'm not aware of any good rules of thumb that people use to determine just
+how large the difference has to be, say, between the largest sample variance
+in the smallest sample variance, or we are inclined to assume that
+our condition for a ANOVA in other words, equal population variances doesn't
+apply in this case. Let's assume that because the
+absolute value of the the difference between the largest sample variance
+and the smallest is not very large. Let's assume that all
+of these populations have the same variance. We don't have anything here to indicate
+that we have normally distributed populations. But again, let's wave our hands and
+assume that when we calculate these diamond contents that these populations
+are indeed normally distributed. So the to the two assumptions we need
+to make in order to use ANOVA, let's assume that both of those assumptions satisfy.
+I have some calculations listed here. These calculations are
+ones that can be used in alternate ways of calculating
+the SS T and SS TR statistics, the associated formulae are
+available in the divorce text. If we calculate these various values, we can
+use them to calculate both S S T and SS to ya. Once we've calculated those values,
+we can calculate S S E based on the formula that SS E plus s s T
+R SS so we can calculate the values
+of our statistics that we can use in our ANOVA table.
+We find that the M.S. TR and MSCI statistics are shown on the PowerPoint,
+when we take the ratio of Amnesty R-Tennessee, we find the value of . 
+. That will be the value of our test testing. Since we have four
+populations for different cereal grains, I minus one is going to equal three.
+Since we have six samples from each of our different populations, I.
+Times the quantity. J minus one will be four times five or . So
+we will look at F distribution with three numerator degrees of freedom
+and  denominator degrees at the point. One significance level, the associated
+critical value for that F distribution is two point three eight at the point O five significance
+level it's three point one at the point zero one significance level it's four point ..
+So, again, finding the value of our test statistic to be . ,
+, we see that that value is between the
+critical value at the . level and the critical value the point a one level. That means our
+P value is between point zero one and point  .
+We would reject at the point   level, we would fail to reject at the point of one level.
+So at least at the point   level, we have evidence
+that the null hypothesis is not true. That there is actually a difference in terms of the average
+thiamin levels for these four different serial rates. So let's see if we
+can use the tukey procedure to get a handle on which
+of these populations, at least in the . level, do we have robust evidence that
+they have different fireman contents? So what we do is we array the
+sample means from least to greatest C that the smallest sample means
+is that associated with Maise at five point five, the largest disassociate
+with OT's and six point nine eight. So we array the sample means from least to greatest.
+We then calculate the value of our w our gage and
+I've included the calculations here on the spreadsheet. You can force through the calculations
+home if you so choose. We find that the value of W
+in this case is one point for one. So what we do again, we've arrayed our
+sample means from least to greatest in applying our tukey procedure. We look at
+the difference between .  and . and onwards. The difference between the
+sample means associated with population  and population . That difference is
+less than or equal to . . So we would we will draw a line between
+. and . . We would draw the inference that at least at the
+five point at the  percent significance level. That the means
+of population  and population  do not if. We would then move
+up the line. Let's look at the difference between the sample mean associated with the second population
+and the sample mean associated with population . minus .
+is less than or equal to one point or one. So again, we would extend our line
+from the sample mean for third population sample mean for the first population to the sample mean
+for the second population. Those three sample means would all be connected. Be along.
+That suggests to us, at least at the  percent significance level, that the thiamin
+level concentrations for these three populations do not differ, these three different serial.print.
+So we then move further up the line. If we look at the difference between the sample mean for the
+fourth population and the sample mean for the third population. Now we see that that
+difference, six point nine, eight minus five point five is greater than our W
+value. So we would not connect B-A align the sample mean
+for the third population, in the sample mean for the fourth population. We would draw the inference
+that at least at the five percent effluence level, there is a difference between
+the average thiamin content for Maise and the average diamond content for OT's
+third and fourth populations. You could then it's not
+necessary because you've actually already seen what you need to see. But you could then move up to the
+first sample mean population, mean social sample, mean associate with the first population
+and ask the question is the difference between sample mean of the second population? The sample
+mean in the first population? Is it less than one point for one? Well, you already know
+that based upon your previous calculations. So you could connect the sample
+mean for the first population and the sample mean for the second population. VLSI.
+What about the difference between B, the sample mean for the fourth population and the sample
+mean for the first population .  minus .  is
+less than or equal to one point for one. So you could connect sample mean for the first population,
+the sample mean for the fourth population. Right. That suggests that at
+least at the  percent significance level, you don't have evidence of
+a difference in the diamond content levels for populations  to.
+Again, you already know the answer to this, but just for completeness sake, you would then move up
+to population, the sample population number two, and you would say, is
+these the sample mean for the fourth population, minus the sample mean for the second
+population? Is that difference less than or equal to W.? The answer is yes. Six point nine,
+eight minus six point six is less than or equal to .. So you could connect those
+two populations B along. You actually had already done that in the second
+step, if you will. But if you wish, you can go ahead and just for the
+sake of completeness, draw a line between the sample mean for the second population
+sample mean beforethe populate. So when all is said and done,
+we have reason to believe at the  percent level. That the
+the the population mean for the third population and the population mean for the fourth population
+are indeed different because we can not connect those two sample means along
+the difference between six point nine eight and . is greater than the W that.
+In the other situations, if we look at the third population, the first population, the second
+population, those sample means can all be connected, be a line that suggests
+that the  percent significance level. We do not have a difference in terms
+of the means of those three populations. If we look at populations ,
+ and , those  populations, or at least their sample means can be connected
+to a line. So at the  percent significance level, we don't have evidence
+that those three populations have different. And I've stated this on
+the PowerPoint slide. I'm going to stop the
+lecture here to engage in a third lecture concerning the
+linear model formulation of this problem.
